@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9a6fc119-28b5-4424-96b9-4174a29cf8cb" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/travis.yaml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/artisancode/fabrication/Fabricator.java" afterPath="$PROJECT_DIR$/src/main/java/com/artisancode/fabrication/Fabricator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/artisancode/fabrication/JObjectBuilder.java" afterPath="$PROJECT_DIR$/src/main/java/com/artisancode/fabrication/JObjectBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/artisancode/fabrication/FabricatorTests.java" afterPath="$PROJECT_DIR$/src/test/java/com/artisancode/fabrication/FabricatorTests.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/readme.md" afterPath="$PROJECT_DIR$/readme.md" />
     </list>
     <ignored path="fabrication.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -62,16 +61,26 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FabricatorTests.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FabricatorTests.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/com/artisancode/fabrication/FabricatorTests.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.4579288">
+            <state vertical-scroll-proportion="0.0">
               <caret line="53" column="35" selection-start-line="53" selection-start-column="35" selection-end-line="53" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#1980#1981#0" expanded="true" />
                 <element signature="e#2000#2001#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="travis.yaml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/travis.yaml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="14" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -127,6 +136,7 @@
         <option value="$PROJECT_DIR$/src/main/java/com/artisancode/fabrication/Fabricator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/artisancode/fabrication/JObjectBuilder.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/artisancode/fabrication/FabricatorTests.java" />
+        <option value="$PROJECT_DIR$/travis.yaml" />
       </list>
     </option>
   </component>
@@ -1207,11 +1217,14 @@
       <updated>1454890074575</updated>
       <workItem from="1454890080251" duration="1755000" />
       <workItem from="1455465942684" duration="704000" />
-      <workItem from="1455466746658" duration="2140000" />
+      <workItem from="1455466746658" duration="2858000" />
     </task>
     <servers />
   </component>
   <component name="TestHistory">
+    <history-entry file="FabricatorTests - 2016.02.14 at 16h 54m 51s.xml">
+      <configuration name="FabricatorTests" configurationId="JUnit" />
+    </history-entry>
     <history-entry file="FabricatorTests_testFabricationChain_IntOnlySpecifiedFabrication_ObjectGeneratedAndCreatedCorrectly - 2016.02.14 at 16h 54m 16s.xml">
       <configuration name="FabricatorTests.testFabricationChain_IntOnlySpecifiedFabrication_ObjectGeneratedAndCreatedCorrectly" configurationId="JUnit" />
     </history-entry>
@@ -1229,7 +1242,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4599000" />
+    <option name="totallyTimeSpent" value="5317000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1096" extended-state="6" />
@@ -1242,8 +1255,8 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917964" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32917964" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917964" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917964" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32917964" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1415,13 +1428,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/artisancode/fabrication/FabricatorTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.4579288">
+        <state vertical-scroll-proportion="0.0">
           <caret line="53" column="35" selection-start-line="53" selection-start-column="35" selection-end-line="53" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#1980#1981#0" expanded="true" />
             <element signature="e#2000#2001#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/travis.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="14" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
+          <folding />
         </state>
       </provider>
     </entry>
