@@ -9,11 +9,13 @@ import java.util.List;
 public class JObjectBuilder<T>
 {
 	private Class<? extends T> target;
+	private FabricatorConfiguration configuration;
 	private List<Action<T>> modifiers;
 
-	public JObjectBuilder(Class<? extends T> target)
+	public JObjectBuilder(Class<? extends T> target, FabricatorConfiguration configuration)
 	{
 		this.target = target;
+		this.configuration = configuration;
 		modifiers = new ArrayList<>();
 	}
 
@@ -32,13 +34,18 @@ public class JObjectBuilder<T>
 			field.setAccessible(true);
 			Class<?> type = field.getType();
 
-			if(type == String.class)
+			if (type == String.class && configuration.isFieldNamesUsedForStrings())
 			{
+				// Special case for Strings that use the fieldName
 				field.set(result, field.getName());
+				continue;
 			}
-			else if(type == int.class)
+
+			if (configuration.getGenerators().containsKey(type))
 			{
-				field.set(result, 1);
+				Func<Object> generator = configuration.getGenerators().get(type);
+				field.set(result, generator.func());
+				continue;
 			}
 		}
 

@@ -33,7 +33,7 @@ public class FabricatorTests
 				                    .fabricate();
 
 		assertEquals(testName, result.getName());
-		assertEquals(1, result.getAge());
+		assertEquals(0, result.getAge());
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class FabricatorTests
 				                    .fabricate();
 
 		assertEquals("name", result.getName());
-		assertEquals(1, result.getAge());
+		assertEquals(0, result.getAge());
 	}
 
 	public class TestObject
