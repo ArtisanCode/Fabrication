@@ -1,5 +1,10 @@
 package com.artisancode.fabrication;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.HashMap;
 
 public class FabricatorConfiguration
@@ -9,6 +14,12 @@ public class FabricatorConfiguration
 	public boolean recursive;
 	public int recurseLimit;
 	public int generationSeed;
+
+	// Temporal helpers
+	public Func<Date> currentDate = () -> Date.from(Instant.now());
+	public Func<Instant> currentInstant = () -> Instant.now();
+	public Func<ZonedDateTime> currentZonedDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC);
+	public Func<LocalDateTime> currentLocalDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
 
 	public FabricatorConfiguration()
 	{
@@ -39,6 +50,12 @@ public class FabricatorConfiguration
 		generators.put(char.class, () -> (char) ('A' + generationSeed));
 		generators.put(boolean.class, () -> false);
 		generators.put(String.class, () -> Integer.toString(generationSeed));
+
+		// Temporal generators
+		generators.put(Date.class, () -> currentDate.func());
+		generators.put(Instant.class, () -> currentInstant.func());
+		generators.put(ZonedDateTime.class, () -> currentZonedDateTime.func());
+		generators.put(LocalDateTime.class, () -> currentLocalDateTime.func());
 	}
 
 	public Object generate(Class<?> targetClass, String fieldName)
