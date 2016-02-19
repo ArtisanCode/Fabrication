@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class FabricatorConfigurationTests
 {
@@ -131,12 +132,14 @@ public class FabricatorConfigurationTests
 	@Test
 	public void testGenerateWithRecursiveFieldGeneration()
 	{
-
 		FabricatorConfiguration target = new FabricatorConfiguration();
 
-		Object actualResult = target.generate(TestClassWithObjectField.class, null);
+		TestClassWithObjectField actualResult = (TestClassWithObjectField) target.generate(TestClassWithObjectField.class, null);
 
-		assertEquals(null, actualResult);
+		assertNotNull(actualResult);
+
+		assertNotNull(actualResult.classField);
+		assertEquals(actualResult.classField.name, "name");
 	}
 
 	public enum TestEnum
