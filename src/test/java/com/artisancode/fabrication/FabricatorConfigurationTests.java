@@ -8,7 +8,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class FabricatorConfigurationTests
 {
@@ -17,8 +17,8 @@ public class FabricatorConfigurationTests
 	{
 		testGenerateRunner(int.class, 0);
 		testGenerateRunner(double.class, 0d);
-		testGenerateRunner(byte.class, (byte)0);
-		testGenerateRunner(short.class, (short)0);
+		testGenerateRunner(byte.class, (byte) 0);
+		testGenerateRunner(short.class, (short) 0);
 		testGenerateRunner(long.class, 0L);
 		testGenerateRunner(float.class, 0f);
 		testGenerateRunner(char.class, 'A');
@@ -26,7 +26,8 @@ public class FabricatorConfigurationTests
 		testGenerateRunner(String.class, "0");
 	}
 
-	public <T> void testGenerateRunner(Class<T> targetClass, T expectedResult) {
+	public <T> void testGenerateRunner(Class<T> targetClass, T expectedResult)
+	{
 		FabricatorConfiguration target = new FabricatorConfiguration();
 
 		Object actualResult = target.generate(targetClass, null);
@@ -34,19 +35,15 @@ public class FabricatorConfigurationTests
 		assertEquals(expectedResult, actualResult);
 	}
 
-	public enum TestEnum{
-		FIRST,
-		SECOND,
-		THIRD
-	}
-
 	@Test
-	public void testDefaultGenerateWithEnum() {
+	public void testDefaultGenerateWithEnum()
+	{
 		testGenerateRunner(TestEnum.class, TestEnum.FIRST);
 	}
 
 	@Test
-	public void testDefaultGenerateWithDateTime(){
+	public void testDefaultGenerateWithDateTime()
+	{
 		Date expectedResult = Date.from(Instant.now());
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
@@ -58,7 +55,8 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithInstant(){
+	public void testDefaultGenerateWithInstant()
+	{
 		Instant expectedResult = Instant.now();
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
@@ -70,8 +68,9 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithZonedDateTime(){
-		ZonedDateTime expectedResult = ZonedDateTime.now( ZoneOffset.UTC );
+	public void testDefaultGenerateWithZonedDateTime()
+	{
+		ZonedDateTime expectedResult = ZonedDateTime.now(ZoneOffset.UTC);
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		target.currentZonedDateTime = () -> expectedResult;
@@ -82,8 +81,9 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithLocalDateTime(){
-		LocalDateTime expectedResult = ZonedDateTime.now( ZoneOffset.UTC ).toLocalDateTime();
+	public void testDefaultGenerateWithLocalDateTime()
+	{
+		LocalDateTime expectedResult = ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		target.currentLocalDateTime = () -> expectedResult;
@@ -94,7 +94,8 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithCustomEnumFunc() {
+	public void testGenerateWithCustomEnumFunc()
+	{
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		target.generators.put(TestEnum.class, () -> TestEnum.THIRD);
@@ -105,7 +106,8 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithStringFieldName() {
+	public void testGenerateWithStringFieldName()
+	{
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		String fieldName = "myFieldName";
@@ -114,4 +116,52 @@ public class FabricatorConfigurationTests
 
 		assertEquals(fieldName, actualResult);
 	}
+
+	@Test
+	public void testGenerateWithInterface()
+	{
+
+		FabricatorConfiguration target = new FabricatorConfiguration();
+
+		Object actualResult = target.generate(TestInterface.class, null);
+
+		assertEquals(null, actualResult);
+	}
+
+	@Test
+	public void testGenerateWithRecursiveFieldGeneration()
+	{
+
+		FabricatorConfiguration target = new FabricatorConfiguration();
+
+		Object actualResult = target.generate(TestClassWithObjectField.class, null);
+
+		assertEquals(null, actualResult);
+	}
+
+	public enum TestEnum
+	{
+		FIRST,
+		SECOND,
+		THIRD
+	}
+
+	public interface TestInterface
+	{
+	}
+
+	public class TestClass
+	{
+		public int age;
+		public String name;
+	}
+
+	public class TestClassWithObjectField
+	{
+		public boolean flag;
+		public int generation;
+		TestClass classField;
+	}
+
+
 }
