@@ -4,27 +4,23 @@ import java.util.HashMap;
 
 public class FabricatorConfiguration
 {
-	private HashMap<Class<?>, Func<Object>> generators;
-
-	private int generation;
-
-	private boolean recursive;
-
-	private boolean useFieldNameForString;
-
-	private int recurseLimit;
+	public HashMap<Class<?>, Func<Object>> generators;
+	public boolean useFieldNameForString;
+	public boolean recursive;
+	public int recurseLimit;
+	public int generationSeed;
 
 	public FabricatorConfiguration()
 	{
-		this.generation = 0;
+		this.generationSeed = 0;
 
 		setDefaultValues();
 		init();
 	}
 
-	public FabricatorConfiguration(int generation)
+	public FabricatorConfiguration(int generationSeed)
 	{
-		this.generation = generation;
+		this.generationSeed = generationSeed;
 
 		setDefaultValues();
 		init();
@@ -34,53 +30,43 @@ public class FabricatorConfiguration
 	{
 		generators = new HashMap<>();
 
-		generators.put(int.class, () -> generation);
-		generators.put(double.class, () -> (double) generation);
-		generators.put(byte.class, () -> (byte) generation);
-		generators.put(short.class, () -> (short) generation);
-		generators.put(long.class, () -> (long) generation);
-		generators.put(float.class, () -> (float) generation);
-		generators.put(char.class, () -> Character.toString((char) (65 + generation)));
+		generators.put(int.class, () -> generationSeed);
+		generators.put(double.class, () -> (double) generationSeed);
+		generators.put(byte.class, () -> (byte) generationSeed);
+		generators.put(short.class, () -> (short) generationSeed);
+		generators.put(long.class, () -> (long) generationSeed);
+		generators.put(float.class, () -> (float) generationSeed);
+		generators.put(char.class, () -> (char) ('A' + generationSeed));
 		generators.put(boolean.class, () -> false);
-		generators.put(String.class, () -> Integer.toString(generation));
+		generators.put(String.class, () -> Integer.toString(generationSeed));
 	}
 
-	public HashMap<Class<?>, Func<Object>> getGenerators()
+	public Object generate(Class<?> targetClass, String fieldName)
 	{
-		return generators;
+		Func<Object> generator = generators.get(targetClass);
+
+		if (targetClass == String.class && useFieldNameForString && fieldName != null)
+		{
+			// Special case for Strings that use the fieldName
+			return fieldName;
+		}
+
+		if (generator != null)
+		{
+			// A default generator exists ... use it!
+			return generator.func();
+		}
+
+		if (targetClass.isEnum())
+		{
+			Class<? extends Enum<?>> targetEnumClass = (Class<? extends Enum<?>>) targetClass;
+			return targetEnumClass.getEnumConstants()[0];
+		}
+
+		return null;
 	}
 
-	public void setGenerators(HashMap<Class<?>, Func<Object>> generators)
-	{
-		this.generators = generators;
-	}
-
-	public int getGeneration()
-	{
-		return generation;
-	}
-
-	public boolean isRecursive()
-	{
-		return recursive;
-	}
-
-	public void setRecursive(boolean recursive)
-	{
-		this.recursive = recursive;
-	}
-
-	public boolean isFieldNamesUsedForStrings()
-	{
-		return useFieldNameForString;
-	}
-
-	public void setUseFieldNameForString(boolean useFieldNameForString)
-	{
-		this.useFieldNameForString = useFieldNameForString;
-	}
-
-	private void setDefaultValues()
+	public void setDefaultValues()
 	{
 		recursive = false;
 		recurseLimit = 5;

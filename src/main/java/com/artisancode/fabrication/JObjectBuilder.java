@@ -4,6 +4,7 @@ import org.objenesis.ObjenesisStd;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JObjectBuilder<T>
@@ -29,24 +30,20 @@ public class JObjectBuilder<T>
 		ObjenesisStd ctor = new ObjenesisStd();
 		T result = ctor.getInstantiatorOf(target).newInstance();
 
+		List<Field> fieldsToTarget = new ArrayList<>();
+
+		Class<?> classWithFields = result.getClass();
+		while(classWithFields.getSuperclass()!=null){ // we don't want to process Object.class
+			Collections.addAll(fieldsToTarget, classWithFields.getDeclaredFields());
+			classWithFields = classWithFields.getSuperclass();
+		}
+		fieldsToTarget.removeIf(x -> x.getName() == "this$0"); // remove the .this fields
+
 		// Fill the object with default values
-		for (Field field : result.getClass().getDeclaredFields()) {
-			field.setAccessible(true);
+		for (Field field : fieldsToTarget) {
 			Class<?> type = field.getType();
-
-			if (type == String.class && configuration.isFieldNamesUsedForStrings())
-			{
-				// Special case for Strings that use the fieldName
-				field.set(result, field.getName());
-				continue;
-			}
-
-			if (configuration.getGenerators().containsKey(type))
-			{
-				Func<Object> generator = configuration.getGenerators().get(type);
-				field.set(result, generator.func());
-				continue;
-			}
+			field.setAccessible(true);
+			field.set(result, configuration.generate(type, field.getName()));
 		}
 
 		// Perform the specific object test modifications

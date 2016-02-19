@@ -61,6 +61,21 @@ public class FabricatorTests
 		assertEquals(0, result.getAge());
 	}
 
+	@Test
+	public void testFabricationChain_InheritedFieldsReferenceInheritedClass_ObjectGeneratedAndCreatedCorrectly() throws Exception
+	{
+		boolean expectedInheritedFlag = true;
+
+		InheritedTestObject result = new Fabricator<InheritedTestObject>()
+				                    .createNew(InheritedTestObject.class)
+				                    .with(x -> x.inheritedFlag = expectedInheritedFlag)
+				                    .fabricate();
+
+		assertEquals("name", result.getName());
+		assertEquals(0, result.getAge());
+		assertEquals(expectedInheritedFlag, result.inheritedFlag);
+	}
+
 	public class TestObject
 	{
 		private String name;
@@ -85,5 +100,10 @@ public class FabricatorTests
 		{
 			this.age = age;
 		}
+	}
+
+	public class InheritedTestObject extends TestObject
+	{
+		public boolean inheritedFlag;
 	}
 }
