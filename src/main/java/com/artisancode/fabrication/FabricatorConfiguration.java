@@ -1,15 +1,19 @@
 package com.artisancode.fabrication;
 
+import com.artisancode.fabrication.lambdas.Func;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class FabricatorConfiguration
 {
-	public HashMap<Class<?>, Func<Object>> generators;
+	public HashMap<Class<?>, Func<Object>> defaultGenerators = new HashMap<>();
+	public HashMap<Class<?>, Func<Object>> customGenerators = new HashMap<>();
 	public boolean useFieldNameForString;
 	public boolean recursive;
 	public int recurseLimit;
@@ -26,7 +30,7 @@ public class FabricatorConfiguration
 		this.generationSeed = 0;
 
 		setDefaultValues();
-		init();
+		initDefaultGenerators();
 	}
 
 	public FabricatorConfiguration(int generationSeed)
@@ -34,33 +38,32 @@ public class FabricatorConfiguration
 		this.generationSeed = generationSeed;
 
 		setDefaultValues();
-		init();
+		initDefaultGenerators();
 	}
 
-	public void init()
+	public void initDefaultGenerators()
 	{
-		generators = new HashMap<>();
-
-		generators.put(int.class, () -> getGenerationSeed());
-		generators.put(double.class, () -> (double) getGenerationSeed());
-		generators.put(byte.class, () -> (byte) getGenerationSeed());
-		generators.put(short.class, () -> (short) getGenerationSeed());
-		generators.put(long.class, () -> (long) getGenerationSeed());
-		generators.put(float.class, () -> (float) getGenerationSeed());
-		generators.put(char.class, () -> (char) ('A' + getGenerationSeed()));
-		generators.put(boolean.class, () -> false);
-		generators.put(String.class, () -> Integer.toString(getGenerationSeed()));
+		defaultGenerators.put(int.class, () -> generationSeed);
+		defaultGenerators.put(double.class, () -> (double) generationSeed);
+		defaultGenerators.put(byte.class, () -> (byte) generationSeed);
+		defaultGenerators.put(short.class, () -> (short) generationSeed);
+		defaultGenerators.put(long.class, () -> (long) generationSeed);
+		defaultGenerators.put(float.class, () -> (float) generationSeed);
+		defaultGenerators.put(char.class, () -> (char) ('A' + generationSeed));
+		defaultGenerators.put(boolean.class, () -> false);
+		defaultGenerators.put(String.class, () -> Integer.toString(generationSeed));
 
 		// Temporal generators
-		generators.put(Date.class, () -> currentDate.func());
-		generators.put(Instant.class, () -> currentInstant.func());
-		generators.put(ZonedDateTime.class, () -> currentZonedDateTime.func());
-		generators.put(LocalDateTime.class, () -> currentLocalDateTime.func());
+		defaultGenerators.put(Date.class, () -> currentDate.func());
+		defaultGenerators.put(Instant.class, () -> currentInstant.func());
+		defaultGenerators.put(ZonedDateTime.class, () -> currentZonedDateTime.func());
+		defaultGenerators.put(LocalDateTime.class, () -> currentLocalDateTime.func());
 	}
 
 	public Object generate(Class<?> targetClass, String fieldName)
 	{
-		Func<Object> generator = generators.get(targetClass);
+		Func<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
+				                         .orElse(defaultGenerators.get(targetClass));
 
 		if (targetClass == String.class && useFieldNameForString && fieldName != null)
 		{
@@ -80,7 +83,7 @@ public class FabricatorConfiguration
 			return targetEnumClass.getEnumConstants()[0];
 		}
 
-		if (!targetClass.isInterface() && recursive)
+		if (!targetClass.isInterface() && recursive && recurseLimit > 0)
 		{
 			JObjectBuilder<Object> builder = new JObjectBuilder(targetClass, cloneForNextGeneration());
 			try
@@ -106,59 +109,19 @@ public class FabricatorConfiguration
 
 	public FabricatorConfiguration cloneForNextGeneration()
 	{
-		FabricatorConfiguration result = new FabricatorConfiguration();
+		FabricatorConfiguration result = new FabricatorConfiguration(generationSeed + 1);
 
 		result.useFieldNameForString = useFieldNameForString;
 		result.recursive = recursive;
-		result.recurseLimit = recurseLimit;
-		result.generators = generators;
+		result.recurseLimit = recurseLimit - 1;
 		result.currentDate = currentDate;
 		result.currentInstant = currentInstant;
 		result.currentZonedDateTime = currentZonedDateTime;
 		result.currentLocalDateTime = currentLocalDateTime;
 
-		result.generationSeed = generationSeed + 1;
+		// Copy across any custom generators that exist
+		customGenerators.entrySet().stream().forEach(x -> result.customGenerators.put(x.getKey(), x.getValue()));
 
 		return result;
-	}
-
-	@Override
-	public boolean equals(Object o)
-	{
-		if (this == o) return true;
-		if (!(o instanceof FabricatorConfiguration)) return false;
-
-		FabricatorConfiguration that = (FabricatorConfiguration) o;
-
-		if (useFieldNameForString != that.useFieldNameForString) return false;
-		if (recursive != that.recursive) return false;
-		if (recurseLimit != that.recurseLimit) return false;
-		if (generationSeed != that.generationSeed) return false;
-		if (!generators.equals(that.generators)) return false;
-		if (!currentDate.equals(that.currentDate)) return false;
-		if (!currentInstant.equals(that.currentInstant)) return false;
-		if (!currentZonedDateTime.equals(that.currentZonedDateTime)) return false;
-		return currentLocalDateTime.equals(that.currentLocalDateTime);
-
-	}
-
-	@Override
-	public int hashCode()
-	{
-		int result = generators.hashCode();
-		result = 31 * result + (useFieldNameForString ? 1 : 0);
-		result = 31 * result + (recursive ? 1 : 0);
-		result = 31 * result + recurseLimit;
-		result = 31 * result + generationSeed;
-		result = 31 * result + currentDate.hashCode();
-		result = 31 * result + currentInstant.hashCode();
-		result = 31 * result + currentZonedDateTime.hashCode();
-		result = 31 * result + currentLocalDateTime.hashCode();
-		return result;
-	}
-
-	protected int getGenerationSeed()
-	{
-		return generationSeed;
 	}
 }

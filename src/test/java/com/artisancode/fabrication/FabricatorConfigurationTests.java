@@ -1,5 +1,6 @@
 package com.artisancode.fabrication;
 
+import com.artisancode.fabrication.lambdas.Action2;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -8,8 +9,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class FabricatorConfigurationTests
 {
@@ -95,11 +95,10 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithCustomEnumFunc()
+	public void testGenerateWithCustomGeneratorEnumFunc()
 	{
-
 		FabricatorConfiguration target = new FabricatorConfiguration();
-		target.generators.put(TestEnum.class, () -> TestEnum.THIRD);
+		target.customGenerators.put(TestEnum.class, () -> TestEnum.THIRD);
 
 		Object actualResult = target.generate(TestEnum.class, null);
 
@@ -107,9 +106,20 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
+	public void testGenerateWithCustomOverrideGeneratorIntFunc()
+	{
+		int expectedValue = 9999;
+		FabricatorConfiguration target = new FabricatorConfiguration();
+		target.customGenerators.put(int.class, () -> expectedValue);
+
+		Object actualResult = target.generate(int.class, null);
+
+		assertEquals(expectedValue, actualResult);
+	}
+
+	@Test
 	public void testGenerateWithStringFieldName()
 	{
-
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		String fieldName = "myFieldName";
 
@@ -139,7 +149,31 @@ public class FabricatorConfigurationTests
 		assertNotNull(actualResult);
 
 		assertNotNull(actualResult.classField);
+
+		assertEquals(actualResult.generation, 1);
 		assertEquals(actualResult.classField.name, "name");
+		assertEquals(actualResult.classField.age, 2);
+	}
+
+	@Test
+	public void testGenerateRecursiveLimit()
+	{
+		FabricatorConfiguration target = new FabricatorConfiguration();
+
+		TestClassRecursiveLimit actualResult = (TestClassRecursiveLimit) target.generate(TestClassRecursiveLimit.class, null);
+
+		Action2<TestClassRecursiveLimit, Integer> checkInnerClass = (inner, generation) -> {
+			assertNotNull(inner);
+			assertEquals(inner.generation, generation.intValue());
+		};
+
+		checkInnerClass.action(actualResult, 1);
+		checkInnerClass.action(actualResult.innerObject, 2);
+		checkInnerClass.action(actualResult.innerObject.innerObject, 3);
+		checkInnerClass.action(actualResult.innerObject.innerObject.innerObject, 4);
+		checkInnerClass.action(actualResult.innerObject.innerObject.innerObject.innerObject, 5);
+
+		assertNull(actualResult.innerObject.innerObject.innerObject.innerObject.innerObject);
 	}
 
 	public enum TestEnum
@@ -164,6 +198,12 @@ public class FabricatorConfigurationTests
 		public boolean flag;
 		public int generation;
 		TestClass classField;
+	}
+
+	public class TestClassRecursiveLimit
+	{
+		int generation;
+		TestClassRecursiveLimit innerObject;
 	}
 
 
