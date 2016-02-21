@@ -204,6 +204,4 @@ public class FabricatorConfigurationTests
 		int generation;
 		TestClassRecursiveLimit innerObject;
 	}
-
-
 }

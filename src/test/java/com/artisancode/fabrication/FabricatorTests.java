@@ -76,6 +76,21 @@ public class FabricatorTests
 		assertEquals(expectedInheritedFlag, result.inheritedFlag);
 	}
 
+	@Test
+	public void testFabricationChain_CustomConfiguration_ObjectGeneratedAndCreatedCorrectly() throws Exception
+	{
+		int expectedResult = 45678;
+		FabricatorConfiguration testConfig = new FabricatorConfiguration();
+		testConfig.customGenerators.put(int.class, () -> expectedResult);
+
+		TestObject result = new Fabricator<TestObject>()
+				                    .createNew(TestObject.class, testConfig)
+				                    .fabricate();
+
+		assertEquals("name", result.getName());
+		assertEquals(expectedResult, result.getAge());
+	}
+
 	public class TestObject
 	{
 		private String name;
