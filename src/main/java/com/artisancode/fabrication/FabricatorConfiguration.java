@@ -12,18 +12,17 @@ import java.util.Optional;
 
 public class FabricatorConfiguration
 {
-	public HashMap<Class<?>, Func<Object>> defaultGenerators = new HashMap<>();
 	public HashMap<Class<?>, Func<Object>> customGenerators = new HashMap<>();
 	public boolean useFieldNameForString;
 	public boolean recursive;
 	public int recurseLimit;
 	public int generationSeed;
-
 	// Temporal helpers
 	public Func<Date> currentDate = () -> Date.from(Instant.now());
 	public Func<Instant> currentInstant = () -> Instant.now();
 	public Func<ZonedDateTime> currentZonedDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC);
 	public Func<LocalDateTime> currentLocalDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
+	protected HashMap<Class<?>, Func<Object>> defaultGenerators = new HashMap<>();
 
 	public FabricatorConfiguration()
 	{
@@ -60,7 +59,7 @@ public class FabricatorConfiguration
 		defaultGenerators.put(LocalDateTime.class, () -> currentLocalDateTime.func());
 	}
 
-	public Object generate(Class<?> targetClass, String fieldName)
+	public Object generate(Class<?> targetClass, String fieldName) throws IllegalAccessException
 	{
 		Func<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
 				                         .orElse(defaultGenerators.get(targetClass));
@@ -86,15 +85,7 @@ public class FabricatorConfiguration
 		if (!targetClass.isInterface() && recursive && recurseLimit > 0)
 		{
 			JObjectBuilder<Object> builder = new JObjectBuilder(targetClass, cloneForNextGeneration());
-			try
-			{
-				return builder.fabricate();
-			}
-			catch (Exception ex)
-			{
-				// Don't care if generation fails...
-				return null;
-			}
+			return builder.fabricate();
 		}
 
 		return null;

@@ -27,7 +27,7 @@ public class FabricatorConfigurationTests
 		testGenerateRunner(String.class, "0");
 	}
 
-	public <T> void testGenerateRunner(Class<T> targetClass, T expectedResult)
+	public <T> void testGenerateRunner(Class<T> targetClass, T expectedResult) throws IllegalAccessException
 	{
 		FabricatorConfiguration target = new FabricatorConfiguration();
 
@@ -37,13 +37,13 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithEnum()
+	public void testDefaultGenerateWithEnum() throws IllegalAccessException
 	{
 		testGenerateRunner(TestEnum.class, TestEnum.FIRST);
 	}
 
 	@Test
-	public void testDefaultGenerateWithDateTime()
+	public void testDefaultGenerateWithDateTime() throws IllegalAccessException
 	{
 		Date expectedResult = Date.from(Instant.now());
 
@@ -56,7 +56,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithInstant()
+	public void testDefaultGenerateWithInstant() throws IllegalAccessException
 	{
 		Instant expectedResult = Instant.now();
 
@@ -69,7 +69,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithZonedDateTime()
+	public void testDefaultGenerateWithZonedDateTime() throws IllegalAccessException
 	{
 		ZonedDateTime expectedResult = ZonedDateTime.now(ZoneOffset.UTC);
 
@@ -82,7 +82,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testDefaultGenerateWithLocalDateTime()
+	public void testDefaultGenerateWithLocalDateTime() throws IllegalAccessException
 	{
 		LocalDateTime expectedResult = ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
 
@@ -95,7 +95,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithCustomGeneratorEnumFunc()
+	public void testGenerateWithCustomGeneratorEnumFunc() throws IllegalAccessException
 	{
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		target.customGenerators.put(TestEnum.class, () -> TestEnum.THIRD);
@@ -106,7 +106,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithCustomOverrideGeneratorIntFunc()
+	public void testGenerateWithCustomOverrideGeneratorIntFunc() throws IllegalAccessException
 	{
 		int expectedValue = 9999;
 		FabricatorConfiguration target = new FabricatorConfiguration();
@@ -118,7 +118,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithStringFieldName()
+	public void testGenerateWithStringFieldName() throws IllegalAccessException
 	{
 		FabricatorConfiguration target = new FabricatorConfiguration();
 		String fieldName = "myFieldName";
@@ -129,7 +129,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithInterface()
+	public void testGenerateWithInterface() throws IllegalAccessException
 	{
 
 		FabricatorConfiguration target = new FabricatorConfiguration();
@@ -140,7 +140,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateWithRecursiveFieldGeneration()
+	public void testGenerateWithRecursiveFieldGeneration() throws IllegalAccessException
 	{
 		FabricatorConfiguration target = new FabricatorConfiguration();
 
@@ -156,7 +156,7 @@ public class FabricatorConfigurationTests
 	}
 
 	@Test
-	public void testGenerateRecursiveLimit()
+	public void testGenerateRecursiveLimit() throws IllegalAccessException
 	{
 		FabricatorConfiguration target = new FabricatorConfiguration();
 
@@ -195,7 +195,6 @@ public class FabricatorConfigurationTests
 
 	public class TestClassWithObjectField
 	{
-		public boolean flag;
 		public int generation;
 		TestClass classField;
 	}

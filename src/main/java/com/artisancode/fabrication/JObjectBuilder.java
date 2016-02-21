@@ -34,14 +34,16 @@ public class JObjectBuilder<T>
 		List<Field> fieldsToTarget = new ArrayList<>();
 
 		Class<?> classWithFields = result.getClass();
-		while(classWithFields.getSuperclass()!=null){ // we don't want to process Object.class
+		while (classWithFields.getSuperclass() != null) // we don't want to process Object.class
+		{
 			Collections.addAll(fieldsToTarget, classWithFields.getDeclaredFields());
 			classWithFields = classWithFields.getSuperclass();
 		}
 		fieldsToTarget.removeIf(x -> x.getName() == "this$0"); // remove the .this fields
 
 		// Fill the object with default values
-		for (Field field : fieldsToTarget) {
+		for (Field field : fieldsToTarget)
+		{
 			Class<?> type = field.getType();
 			field.setAccessible(true);
 			field.set(result, configuration.generate(type, field.getName()));
