@@ -8,20 +8,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class JObjectBuilder<T>
+public class ObjectBuilder<T>
 {
 	private Class<? extends T> target;
 	private FabricatorConfiguration configuration;
 	private List<Action1<T>> modifiers;
 
-	public JObjectBuilder(Class<? extends T> target, FabricatorConfiguration configuration)
+	public ObjectBuilder(Class<? extends T> target, FabricatorConfiguration configuration)
 	{
 		this.target = target;
 		this.configuration = configuration;
 		modifiers = new ArrayList<>();
 	}
 
-	public JObjectBuilder<T> and(Action1<T> property)
+	public ObjectBuilder<T> and(Action1<T> property)
 	{
 		return add(property);
 	}
@@ -65,12 +65,12 @@ public class JObjectBuilder<T>
 		return result;
 	}
 
-	public JObjectBuilder<T> with(Action1<T> property)
+	public ObjectBuilder<T> with(Action1<T> property)
 	{
 		return add(property);
 	}
 
-	protected JObjectBuilder<T> add(Action1<T> property)
+	protected ObjectBuilder<T> add(Action1<T> property)
 	{
 		modifiers.add(property);
 		return this;

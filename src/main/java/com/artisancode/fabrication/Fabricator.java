@@ -2,12 +2,13 @@ package com.artisancode.fabrication;
 
 public class Fabricator<T>
 {
-	public JObjectBuilder<T> createNew(Class<T> target){
-		return new JObjectBuilder<>(target, new FabricatorConfiguration());
+	public ObjectBuilder<T> createNew(Class<T> target)
+	{
+		return new ObjectBuilder<>(target, new FabricatorConfiguration());
 	}
 
-	public JObjectBuilder<T> createNew(Class<T> target, FabricatorConfiguration configuration)
+	public ObjectBuilder<T> createNew(Class<T> target, FabricatorConfiguration configuration)
 	{
-		return new JObjectBuilder<>(target, configuration);
+		return new ObjectBuilder<>(target, configuration);
 	}
 }

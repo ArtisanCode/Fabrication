@@ -90,7 +90,7 @@ public class FabricatorConfiguration
 		if (canFabricate && shouldFabricate)
 		{
 			// If recursing and there is at least one more level to go, try and generate the sub-object
-			JObjectBuilder<Object> builder = new JObjectBuilder(targetClass, cloneForNextGeneration());
+			ObjectBuilder<Object> builder = new ObjectBuilder(targetClass, cloneForNextGeneration());
 			return builder.fabricate();
 		}
 
