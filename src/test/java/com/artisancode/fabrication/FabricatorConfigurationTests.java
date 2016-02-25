@@ -176,6 +176,16 @@ public class FabricatorConfigurationTests
 		assertNull(actualResult.innerObject.innerObject.innerObject.innerObject.innerObject);
 	}
 
+	@Test
+	public void testGenerateWithAbstractClasses() throws IllegalAccessException
+	{
+		FabricatorConfiguration target = new FabricatorConfiguration();
+
+		TestAbstractClass actualResult = (TestAbstractClass) target.generate(TestAbstractClass.class, null);
+
+		assertNull(actualResult);
+	}
+
 	public enum TestEnum
 	{
 		FIRST,
@@ -203,5 +213,9 @@ public class FabricatorConfigurationTests
 	{
 		int generation;
 		TestClassRecursiveLimit innerObject;
+	}
+
+	public abstract class TestAbstractClass
+	{
 	}
 }

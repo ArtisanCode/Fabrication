@@ -1,6 +1,8 @@
 package com.artisancode.fabrication.lambdas;
 
-public interface Func1<TResult, TParam1>
+public interface Func1<TResult>
 {
-	TResult func(TParam1 param1);
+	TResult func();
 }
+
+

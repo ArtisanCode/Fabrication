@@ -1,7 +1,8 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Func;
+import com.artisancode.fabrication.lambdas.Func1;
 
+import java.lang.reflect.Modifier;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -12,17 +13,17 @@ import java.util.Optional;
 
 public class FabricatorConfiguration
 {
-	public HashMap<Class<?>, Func<Object>> customGenerators = new HashMap<>();
+	public HashMap<Class<?>, Func1<Object>> customGenerators = new HashMap<>();
 	public boolean useFieldNameForString;
 	public boolean recursive;
 	public int recurseLimit;
 	public int generationSeed;
 	// Temporal helpers
-	public Func<Date> currentDate = () -> Date.from(Instant.now());
-	public Func<Instant> currentInstant = () -> Instant.now();
-	public Func<ZonedDateTime> currentZonedDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC);
-	public Func<LocalDateTime> currentLocalDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
-	protected HashMap<Class<?>, Func<Object>> defaultGenerators = new HashMap<>();
+	public Func1<Date> currentDate = () -> Date.from(Instant.now());
+	public Func1<Instant> currentInstant = () -> Instant.now();
+	public Func1<ZonedDateTime> currentZonedDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC);
+	public Func1<LocalDateTime> currentLocalDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
+	protected HashMap<Class<?>, Func1<Object>> defaultGenerators = new HashMap<>();
 
 	public FabricatorConfiguration()
 	{
@@ -59,9 +60,9 @@ public class FabricatorConfiguration
 		defaultGenerators.put(LocalDateTime.class, () -> currentLocalDateTime.func());
 	}
 
-	public Object generate(Class<?> targetClass, String fieldName) throws IllegalAccessException
+	public Object generate(Class<?> targetClass, String fieldName)
 	{
-		Func<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
+		Func1<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
 				                         .orElse(defaultGenerators.get(targetClass));
 
 		if (targetClass == String.class && useFieldNameForString && fieldName != null)
@@ -72,22 +73,28 @@ public class FabricatorConfiguration
 
 		if (generator != null)
 		{
-			// A default generator exists ... use it!
+			// A generator exists ... use it!
 			return generator.func();
 		}
 
 		if (targetClass.isEnum())
 		{
+			// Default the value to the first value in the Enum
 			Class<? extends Enum<?>> targetEnumClass = (Class<? extends Enum<?>>) targetClass;
 			return targetEnumClass.getEnumConstants()[0];
 		}
 
-		if (!targetClass.isInterface() && recursive && recurseLimit > 0)
+		// We can't fabricate interfaces or abstract classes
+		boolean canFabricate = !targetClass.isInterface() && !Modifier.isAbstract(targetClass.getModifiers());
+		boolean shouldFabricate = recursive && recurseLimit > 0;
+		if (canFabricate && shouldFabricate)
 		{
+			// If recursing and there is at least one more level to go, try and generate the sub-object
 			JObjectBuilder<Object> builder = new JObjectBuilder(targetClass, cloneForNextGeneration());
 			return builder.fabricate();
 		}
 
+		// If all else fails
 		return null;
 	}
 

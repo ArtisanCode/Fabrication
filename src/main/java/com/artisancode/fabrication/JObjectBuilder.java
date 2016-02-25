@@ -1,6 +1,6 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Action;
+import com.artisancode.fabrication.lambdas.Action1;
 import org.objenesis.ObjenesisStd;
 
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ public class JObjectBuilder<T>
 {
 	private Class<? extends T> target;
 	private FabricatorConfiguration configuration;
-	private List<Action<T>> modifiers;
+	private List<Action1<T>> modifiers;
 
 	public JObjectBuilder(Class<? extends T> target, FabricatorConfiguration configuration)
 	{
@@ -21,12 +21,12 @@ public class JObjectBuilder<T>
 		modifiers = new ArrayList<>();
 	}
 
-	public JObjectBuilder<T> and(Action<T> property)
+	public JObjectBuilder<T> and(Action1<T> property)
 	{
 		return add(property);
 	}
 
-	public T fabricate() throws IllegalAccessException
+	public T fabricate()
 	{
 		ObjenesisStd ctor = new ObjenesisStd();
 		T result = ctor.getInstantiatorOf(target).newInstance();
@@ -46,11 +46,18 @@ public class JObjectBuilder<T>
 		{
 			Class<?> type = field.getType();
 			field.setAccessible(true);
-			field.set(result, configuration.generate(type, field.getName()));
+			try
+			{
+				field.set(result, configuration.generate(type, field.getName()));
+			}
+			catch (IllegalAccessException e)
+			{
+				throw new FabricationException(e);
+			}
 		}
 
 		// Perform the specific object test modifications
-		for (Action<T> modifier : modifiers)
+		for (Action1<T> modifier : modifiers)
 		{
 			modifier.action(result);
 		}
@@ -58,12 +65,12 @@ public class JObjectBuilder<T>
 		return result;
 	}
 
-	public JObjectBuilder<T> with(Action<T> property)
+	public JObjectBuilder<T> with(Action1<T> property)
 	{
 		return add(property);
 	}
 
-	protected JObjectBuilder<T> add(Action<T> property)
+	protected JObjectBuilder<T> add(Action1<T> property)
 	{
 		modifiers.add(property);
 		return this;
