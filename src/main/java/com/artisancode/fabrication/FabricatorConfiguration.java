@@ -27,17 +27,16 @@ public class FabricatorConfiguration
 
 	public FabricatorConfiguration()
 	{
-		this.generationSeed = 0;
-
-		setDefaultValues();
-		initDefaultGenerators();
+		this(0);
 	}
 
 	public FabricatorConfiguration(int generationSeed)
 	{
 		this.generationSeed = generationSeed;
+		recursive = true;
+		recurseLimit = 5;
+		useFieldNameForString = true;
 
-		setDefaultValues();
 		initDefaultGenerators();
 	}
 
@@ -63,7 +62,7 @@ public class FabricatorConfiguration
 	public Object generate(Class<?> targetClass, String fieldName)
 	{
 		Func1<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
-				                         .orElse(defaultGenerators.get(targetClass));
+				                          .orElse(defaultGenerators.get(targetClass));
 
 		if (targetClass == String.class && useFieldNameForString && fieldName != null)
 		{
@@ -96,13 +95,6 @@ public class FabricatorConfiguration
 
 		// If all else fails
 		return null;
-	}
-
-	public void setDefaultValues()
-	{
-		recursive = true;
-		recurseLimit = 5;
-		useFieldNameForString = true;
 	}
 
 	public FabricatorConfiguration cloneForNextGeneration()

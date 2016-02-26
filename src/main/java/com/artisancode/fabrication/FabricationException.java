@@ -4,6 +4,11 @@ public class FabricationException extends RuntimeException
 {
 	public FabricationException(Exception e)
 	{
-		this.initCause(e);
+		super(e);
+	}
+
+	public FabricationException(String message)
+	{
+		super(message);
 	}
 }

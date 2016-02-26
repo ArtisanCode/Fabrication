@@ -10,9 +10,9 @@ import java.util.List;
 
 public class ObjectBuilder<T>
 {
-	private Class<? extends T> target;
-	private FabricatorConfiguration configuration;
-	private List<Action1<T>> modifiers;
+	protected Class<? extends T> target;
+	protected FabricatorConfiguration configuration;
+	protected List<Action1<T>> modifiers;
 
 	public ObjectBuilder(Class<? extends T> target, FabricatorConfiguration configuration)
 	{

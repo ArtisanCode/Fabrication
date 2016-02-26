@@ -111,7 +111,7 @@ public class FabricatorTests
 				                    .and(x -> x.age = 5)
 				                    .thePrevious(2)
 				                    .with(x -> x.age = 4)
-				                    .everyNth(5)
+				                    .everyNth(3)
 				                    .with(x -> x.title = "Dr")
 				                    .and(x -> x.age = 50)
 				                    .theSlice(0, 3)
