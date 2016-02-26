@@ -141,6 +141,7 @@ public class CollectionBuilder<T>
 			}
 			case LAST:
 			{
+				handleLastModifications(modifier);
 				break;
 			}
 			case PREVIOUS:
@@ -162,6 +163,28 @@ public class CollectionBuilder<T>
 		}
 
 		return this;
+	}
+
+	private void handleLastModifications(Action1<T> modifier)
+	{
+		// TODO: check logic & generify
+		if (operationModifier < 1)
+		{
+			throw new FabricationException(String.format("Unable to modify the last %d elements as the number of elements to affect needs to be a positive integer", operationModifier));
+		}
+
+		if (operationModifier > size)
+		{
+			throw new FabricationException(String.format("Unable to modify the last %d elements as the list is only of size %d", operationModifier, size));
+		}
+
+		lastModificationStartIndex = size - operationModifier;
+		lastModificationEndIndex = size - 1;
+
+		for (int i = lastModificationStartIndex; i <= lastModificationEndIndex; i++)
+		{
+			modificationsArray.get(i).add(modifier);
+		}
 	}
 
 	public void handleGlobalModifications(Action1<T> modifier)
