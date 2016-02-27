@@ -3,12 +3,62 @@ package com.artisancode.fabrication;
 import com.artisancode.fabrication.lambdas.Action1;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class CollectionBuilderTest
 {
+
 	@Test
-	public void handleFirstModifications_ValidNumberOfModifications_ModificationsAddedToFoundations()
+	public void ofSize_ReinitializeState_SetStateAccordinglyAndCreateNewModificationsList()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+		int sizeBefore = target.size;
+		java.util.List<java.util.List<Action1<FabricatorTests.TestObject>>> modifiersBefore = target.modificationsArray;
+
+		int targetSize = 10;
+
+		target.ofSize(targetSize);
+
+		assertEquals(targetSize, target.size);
+		assertNotNull(target.modificationsArray);
+		assertNotSame(modifiersBefore, target.modificationsArray);
+		assertEquals(targetSize, target.modificationsArray.size());
+	}
+
+	@Test
+	public void handleAllModifications_AddModifier_ModificationsAddedToAll()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+		int startIndex = 3;
+		int endIndex = 4;
+
+		target.lastModificationStartIndex = startIndex;
+		target.lastModificationEndIndex = endIndex;
+
+		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		target.all().with(modifier);
+
+		// Check that the first 2 elements have modifications
+		assertEquals(5, target.modificationsArray.size());
+		assertEquals(1, target.modificationsArray.get(0).size());
+		assertEquals(1, target.modificationsArray.get(1).size());
+		assertEquals(1, target.modificationsArray.get(2).size());
+		assertEquals(1, target.modificationsArray.get(3).size());
+		assertEquals(1, target.modificationsArray.get(4).size());
+
+		assertEquals(modifier, target.modificationsArray.get(0).get(0));
+		assertEquals(modifier, target.modificationsArray.get(1).get(0));
+		assertEquals(modifier, target.modificationsArray.get(2).get(0));
+		assertEquals(modifier, target.modificationsArray.get(3).get(0));
+		assertEquals(modifier, target.modificationsArray.get(4).get(0));
+
+		// Check that the index state hasn't been changed
+		assertEquals(startIndex, target.lastModificationStartIndex);
+		assertEquals(endIndex, target.lastModificationEndIndex);
+	}
+
+	@Test
+	public void handleFirstModifications_ValidNumberOfModifications_ModificationsAdded()
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
@@ -48,7 +98,7 @@ public class CollectionBuilderTest
 	}
 
 	@Test
-	public void handleLastModifications_ValidNumberOfModifications_ModificationsAddedToFoundations()
+	public void handleLastModifications_ValidNumberOfModifications_ModificationsAdded()
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
@@ -88,7 +138,7 @@ public class CollectionBuilderTest
 	}
 
 	@Test
-	public void handleSliceModifications_ValidNumberOfModifications_ModificationsAddedToFoundations()
+	public void handleSliceModifications_ValidNumberOfModifications_ModificationsAdded()
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
@@ -150,5 +200,46 @@ public class CollectionBuilderTest
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
 		target.theSlice(-5, 3).with(x -> x.name = "bob");
+	}
+
+
+	@Test
+	public void handleTheNthModifications_ModifyThe4thElement_ModificationsAdded()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+
+		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		target.theNth(3).with(modifier);
+
+		// Check that the first 2 elements have modifications
+		assertEquals(5, target.modificationsArray.size());
+		assertEquals(0, target.modificationsArray.get(0).size());
+		assertEquals(0, target.modificationsArray.get(1).size());
+		assertEquals(0, target.modificationsArray.get(2).size());
+		assertEquals(1, target.modificationsArray.get(3).size());
+		assertEquals(0, target.modificationsArray.get(4).size());
+
+		assertEquals(modifier, target.modificationsArray.get(3).get(0));
+
+		// Check that the state has been modified correctly
+		assertEquals(3, target.lastModificationStartIndex);
+		assertEquals(3, target.lastModificationEndIndex);
+	}
+
+	@Test(expected = FabricationException.class)
+	public void handleTheNthModifications_NegativeNumberOfModifications_FabricationExceptionThrown()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+
+		target.theNth(-1).with(x -> x.name = "bob");
+	}
+
+	@Test(expected = FabricationException.class)
+	public void handleTheNthModifications_5ThModifications_FabricationExceptionThrown()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+
+		// Expect to throw as array is 0-based
+		target.theNth(5).with(x -> x.name = "bob");
 	}
 }

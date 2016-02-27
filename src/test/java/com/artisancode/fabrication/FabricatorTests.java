@@ -3,6 +3,7 @@ package com.artisancode.fabrication;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FabricatorTests
 {
@@ -64,16 +65,14 @@ public class FabricatorTests
 	@Test
 	public void testFabricationChain_InheritedFieldsReferenceInheritedClass_ObjectGeneratedAndCreatedCorrectly() throws Exception
 	{
-		boolean expectedInheritedFlag = true;
-
 		InheritedTestObject result = new Fabricator<InheritedTestObject>()
 				                    .createNew(InheritedTestObject.class)
-				                    .with(x -> x.inheritedFlag = expectedInheritedFlag)
+				                             .with(x -> x.inheritedFlag = true)
 				                    .fabricate();
 
 		assertEquals("name", result.name);
 		assertEquals(0, result.age);
-		assertEquals(expectedInheritedFlag, result.inheritedFlag);
+		assertTrue(result.inheritedFlag);
 	}
 
 	@Test
@@ -103,6 +102,8 @@ public class FabricatorTests
 				                    .theFirst(2)
 				                    .with(x -> x.title = "Mr")
 				                    .and(x -> x.age = 20)
+				                    .theNth(4)
+				                    .with(x -> x.title = "Minister")
 				                    .theNext(2)
 				                    .with(x -> x.title = "Mrs")
 				                    .and(x -> x.age = 23)

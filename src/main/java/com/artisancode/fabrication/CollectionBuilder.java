@@ -92,9 +92,16 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
-	public CollectionBuilder<T> everyNth(int number)
+	public CollectionBuilder<T> theNth(int number)
 	{
 		state = Behaviour.NTH;
+		operationModifier = number;
+		return this;
+	}
+
+	public CollectionBuilder<T> everyNth(int number)
+	{
+		state = Behaviour.EVERY_NTH;
 		operationModifier = number;
 		return this;
 	}
@@ -149,6 +156,11 @@ public class CollectionBuilder<T>
 			}
 			case NTH:
 			{
+				handleModifyTheNthElement(modifier);
+				break;
+			}
+			case EVERY_NTH:
+			{
 				break;
 			}
 			case SLICE:
@@ -165,31 +177,46 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
+	private void handleModifyTheNthElement(Action1<T> modifier)
+	{
+		if (operationModifier < 0)
+		{
+			throw new FabricationException(String.format("Unable to modify the nth element %d as the index to affect needs to be a positive integer or zero", operationModifier));
+		}
+
+		if (operationModifier >= size)
+		{
+			throw new FabricationException(String.format("Unable to modify the nth element %d as the index to affect needs to less than the total size of the collection %d", operationModifier, size));
+		}
+
+		modifySlice(modifier, operationModifier, operationModifier);
+	}
+
 	private void handleSliceModifications(Action1<T> modifier)
 	{
-		if (operationModifier < 1)
+		if (operationModifier < 0)
 		{
-			throw new FabricationException(String.format("Unable to modify the start the slice at %d as the index to affect needs to be a positive integer", operationModifier));
+			throw new FabricationException(String.format("Unable to modify the start of the slice at %d as the start index needs to be a positive integer or zero", secondaryModifier));
 		}
 
-		if (operationModifier > size)
+		if (operationModifier > size - 2)
 		{
-			throw new FabricationException(String.format("Unable to slice as the start index %d is greater than the size of the collection %d", operationModifier, size));
+			throw new FabricationException(String.format("Unable to modify the start of the slice at %d as the start index needs to be two less than the size of the collection", secondaryModifier));
 		}
 
-		if (secondaryModifier < 1)
+		if (secondaryModifier < 0)
 		{
-			throw new FabricationException(String.format("Unable to modify the end the slice at %d as the index to affect needs to be a positive integer", secondaryModifier));
+			throw new FabricationException(String.format("Unable to modify the end of the slice at %d as the end index needs to be a positive integer", secondaryModifier));
 		}
 
-		if (secondaryModifier > size)
+		if (secondaryModifier >= size)
 		{
 			throw new FabricationException(String.format("Unable to slice as the end index %d is greater than the size of the collection %d", secondaryModifier, size));
 		}
 
 		if (operationModifier == secondaryModifier)
 		{
-			throw new FabricationException(String.format("Unable to slice as the start and end index are the same (%d)", secondaryModifier));
+			throw new FabricationException(String.format("Unable to slice as the start and end index are the same (%d)... Did you mean to use operation: theNth?", secondaryModifier));
 		}
 
 		modifySlice(modifier, operationModifier, secondaryModifier);
@@ -252,6 +279,7 @@ public class CollectionBuilder<T>
 		NEXT,
 		LAST,
 		PREVIOUS,
+		EVERY_NTH,
 		NTH,
 		SLICE,
 		RANDOM
