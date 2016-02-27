@@ -1,6 +1,5 @@
 package com.artisancode.fabrication;
 
-
 import com.artisancode.fabrication.lambdas.Action1;
 
 import java.util.ArrayList;
@@ -102,7 +101,7 @@ public class CollectionBuilder<T>
 
 	public CollectionBuilder<T> theSlice(int start, int end)
 	{
-		state = Behaviour.NTH;
+		state = Behaviour.SLICE;
 		operationModifier = start;
 		secondaryModifier = end;
 		return this;
@@ -154,6 +153,7 @@ public class CollectionBuilder<T>
 			}
 			case SLICE:
 			{
+				handleSliceModifications(modifier);
 				break;
 			}
 			case RANDOM:
@@ -165,9 +165,49 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
+	private void handleSliceModifications(Action1<T> modifier)
+	{
+		if (operationModifier < 1)
+		{
+			throw new FabricationException(String.format("Unable to modify the start the slice at %d as the index to affect needs to be a positive integer", operationModifier));
+		}
+
+		if (operationModifier > size)
+		{
+			throw new FabricationException(String.format("Unable to slice as the start index %d is greater than the size of the collection %d", operationModifier, size));
+		}
+
+		if (secondaryModifier < 1)
+		{
+			throw new FabricationException(String.format("Unable to modify the end the slice at %d as the index to affect needs to be a positive integer", secondaryModifier));
+		}
+
+		if (secondaryModifier > size)
+		{
+			throw new FabricationException(String.format("Unable to slice as the end index %d is greater than the size of the collection %d", secondaryModifier, size));
+		}
+
+		if (operationModifier == secondaryModifier)
+		{
+			throw new FabricationException(String.format("Unable to slice as the start and end index are the same (%d)", secondaryModifier));
+		}
+
+		modifySlice(modifier, operationModifier, secondaryModifier);
+	}
+
+	private void modifySlice(Action1<T> modifier, int start, int end)
+	{
+		lastModificationStartIndex = start;
+		lastModificationEndIndex = end;
+
+		for (int i = lastModificationStartIndex; i <= lastModificationEndIndex; i++)
+		{
+			modificationsArray.get(i).add(modifier);
+		}
+	}
+
 	private void handleLastModifications(Action1<T> modifier)
 	{
-		// TODO: check logic & generify
 		if (operationModifier < 1)
 		{
 			throw new FabricationException(String.format("Unable to modify the last %d elements as the number of elements to affect needs to be a positive integer", operationModifier));
@@ -178,13 +218,7 @@ public class CollectionBuilder<T>
 			throw new FabricationException(String.format("Unable to modify the last %d elements as the list is only of size %d", operationModifier, size));
 		}
 
-		lastModificationStartIndex = size - operationModifier;
-		lastModificationEndIndex = size - 1;
-
-		for (int i = lastModificationStartIndex; i <= lastModificationEndIndex; i++)
-		{
-			modificationsArray.get(i).add(modifier);
-		}
+		modifySlice(modifier, size - operationModifier, size - 1);
 	}
 
 	public void handleGlobalModifications(Action1<T> modifier)
@@ -207,13 +241,8 @@ public class CollectionBuilder<T>
 			throw new FabricationException(String.format("Unable to modify the first %d elements as the list is only of size %d", operationModifier, size));
 		}
 
-		lastModificationStartIndex = 0;
-		lastModificationEndIndex = operationModifier - 1;
 
-		for (int i = 0; i <= lastModificationEndIndex; i++)
-		{
-			modificationsArray.get(i).add(modifier);
-		}
+		modifySlice(modifier, 0, operationModifier - 1);
 	}
 
 	public enum Behaviour
