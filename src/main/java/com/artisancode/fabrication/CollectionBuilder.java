@@ -1,10 +1,11 @@
 package com.artisancode.fabrication;
 
 import com.artisancode.fabrication.lambdas.Action1;
+import com.artisancode.fabrication.lambdas.Func1;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.*;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class CollectionBuilder<T>
 {
@@ -17,6 +18,9 @@ public class CollectionBuilder<T>
 	protected int lastModificationStartIndex = 0;
 	protected int lastModificationEndIndex = 0;
 	protected List<List<Action1<T>>> modificationsArray;
+	protected Predicate<Integer> operationPredicate;
+	protected Random random;
+	protected Func1<Integer> getRandomIndex = () -> random.nextInt(size);
 
 	public CollectionBuilder(Class<? extends T> target)
 	{
@@ -99,10 +103,14 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
-	public CollectionBuilder<T> everyNth(int number)
+	/**
+	 * @param predicate A function that takes in the index and the o
+	 * @return
+	 */
+	public CollectionBuilder<T> predicated(Predicate<Integer> predicate)
 	{
-		state = Behaviour.EVERY_NTH;
-		operationModifier = number;
+		state = Behaviour.PREDICATE;
+		operationPredicate = predicate;
 		return this;
 	}
 
@@ -118,6 +126,7 @@ public class CollectionBuilder<T>
 	{
 		state = Behaviour.RANDOM;
 		operationModifier = number;
+		random = new Random((int)LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toEpochSecond());
 		return this;
 	}
 
@@ -159,8 +168,9 @@ public class CollectionBuilder<T>
 				handleModifyTheNthElement(modifier);
 				break;
 			}
-			case EVERY_NTH:
+			case PREDICATE:
 			{
+				handlePredicatedModifications(modifier);
 				break;
 			}
 			case SLICE:
@@ -170,6 +180,7 @@ public class CollectionBuilder<T>
 			}
 			case RANDOM:
 			{
+				handleRandomModifications(modifier);
 				break;
 			}
 		}
@@ -177,7 +188,53 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
-	private void handleModifyTheNthElement(Action1<T> modifier)
+	private void handleRandomModifications(Action1<T> modifier)
+	{
+		if (operationModifier < 0)
+		{
+			throw new FabricationException(String.format("Unable to modify %d number of random elements as the number of nodes to affect needs to be a positive integer or zero", operationModifier));
+		}
+
+		if (operationModifier > size)
+		{
+			throw new FabricationException(String.format("Unable to modify %d number of random elements as the number of nodes to affect needs to less than or equal to the total size of the collection %d", operationModifier, size));
+		}
+
+		Set<Integer> indiciesToModify = new HashSet<>(size);
+
+		while(indiciesToModify.size() != operationModifier)
+		{
+			indiciesToModify.add(getRandomIndex.func());
+		}
+
+		for (Integer index : indiciesToModify)
+		{
+			modificationsArray.get(index).add(modifier);
+		}
+	}
+
+	protected void handlePredicatedModifications(Action1<T> modifier)
+	{
+		boolean modified = false;
+		for (int i = 0; i < modificationsArray.size(); i++)
+		{
+			// If the index matches the predicate, then add the modifier
+			if(operationPredicate.test(i))
+			{
+				if(!modified)
+				{
+					// Only set the start index state the first time we set a modifier
+					modified = true;
+					lastModificationStartIndex = i;
+				}
+
+				modificationsArray.get(i).add(modifier);
+				lastModificationEndIndex = i;
+			}
+		}
+	}
+
+	protected void handleModifyTheNthElement(Action1<T> modifier)
 	{
 		if (operationModifier < 0)
 		{
@@ -192,7 +249,7 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, operationModifier, operationModifier);
 	}
 
-	private void handleSliceModifications(Action1<T> modifier)
+	protected void handleSliceModifications(Action1<T> modifier)
 	{
 		if (operationModifier < 0)
 		{
@@ -222,18 +279,7 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, operationModifier, secondaryModifier);
 	}
 
-	private void modifySlice(Action1<T> modifier, int start, int end)
-	{
-		lastModificationStartIndex = start;
-		lastModificationEndIndex = end;
-
-		for (int i = lastModificationStartIndex; i <= lastModificationEndIndex; i++)
-		{
-			modificationsArray.get(i).add(modifier);
-		}
-	}
-
-	private void handleLastModifications(Action1<T> modifier)
+	protected void handleLastModifications(Action1<T> modifier)
 	{
 		if (operationModifier < 1)
 		{
@@ -272,6 +318,17 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, 0, operationModifier - 1);
 	}
 
+	protected void modifySlice(Action1<T> modifier, int start, int end)
+	{
+		lastModificationStartIndex = start;
+		lastModificationEndIndex = end;
+
+		for (int i = lastModificationStartIndex; i <= lastModificationEndIndex; i++)
+		{
+			modificationsArray.get(i).add(modifier);
+		}
+	}
+
 	public enum Behaviour
 	{
 		ALL,
@@ -279,9 +336,9 @@ public class CollectionBuilder<T>
 		NEXT,
 		LAST,
 		PREVIOUS,
-		EVERY_NTH,
 		NTH,
 		SLICE,
+		PREDICATE,
 		RANDOM
 	}
 }

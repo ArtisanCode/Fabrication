@@ -12,7 +12,6 @@ public class CollectionBuilderTest
 	public void ofSize_ReinitializeState_SetStateAccordinglyAndCreateNewModificationsList()
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
-		int sizeBefore = target.size;
 		java.util.List<java.util.List<Action1<FabricatorTests.TestObject>>> modifiersBefore = target.modificationsArray;
 
 		int targetSize = 10;
@@ -53,6 +52,69 @@ public class CollectionBuilderTest
 		assertEquals(modifier, target.modificationsArray.get(4).get(0));
 
 		// Check that the index state hasn't been changed
+		assertEquals(startIndex, target.lastModificationStartIndex);
+		assertEquals(endIndex, target.lastModificationEndIndex);
+	}
+
+	@Test
+	public void handleRandomModifications_TwoModifier_ModificationsAddedToTwo()
+	{
+		testRandomMethods(0);
+		testRandomMethods(1);
+		testRandomMethods(2);
+		testRandomMethods(3);
+		testRandomMethods(4);
+		testRandomMethods(5);
+	}
+
+	protected void testRandomMethods(int numberOfModifications)
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+		int startIndex = 3;
+		int endIndex = 4;
+
+		target.lastModificationStartIndex = startIndex;
+		target.lastModificationEndIndex = endIndex;
+
+		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		target.random(numberOfModifications).and(modifier);
+
+		// Check that the first 2 elements have modifications
+		assertEquals(5, target.modificationsArray.size());
+		Object[] modArray = target.modificationsArray.stream().filter(x -> x.size() == 1).toArray();
+
+		assertEquals(numberOfModifications, modArray.length);
+
+		// Check that the index state hasn't been changed
+		assertEquals(startIndex, target.lastModificationStartIndex);
+		assertEquals(endIndex, target.lastModificationEndIndex);
+	}
+
+	@Test
+	public void handlePredicateModifications_AddModifier_ModificationsAddedToEvenIndiciesOnly()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+		int startIndex = 2;
+		int endIndex = 4;
+
+		target.lastModificationStartIndex = 0;
+		target.lastModificationEndIndex = 0;
+
+		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		target.predicated(i -> i%2==0 && i!=0).with(modifier);
+
+		// Check that the first 2 elements have modifications
+		assertEquals(5, target.modificationsArray.size());
+		assertEquals(0, target.modificationsArray.get(0).size());
+		assertEquals(0, target.modificationsArray.get(1).size());
+		assertEquals(1, target.modificationsArray.get(2).size());
+		assertEquals(0, target.modificationsArray.get(3).size());
+		assertEquals(1, target.modificationsArray.get(4).size());
+
+		assertEquals(modifier, target.modificationsArray.get(2).get(0));
+		assertEquals(modifier, target.modificationsArray.get(4).get(0));
+
+		// Check that the index state has been set correctly
 		assertEquals(startIndex, target.lastModificationStartIndex);
 		assertEquals(endIndex, target.lastModificationEndIndex);
 	}

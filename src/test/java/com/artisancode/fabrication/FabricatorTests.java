@@ -66,9 +66,9 @@ public class FabricatorTests
 	public void testFabricationChain_InheritedFieldsReferenceInheritedClass_ObjectGeneratedAndCreatedCorrectly() throws Exception
 	{
 		InheritedTestObject result = new Fabricator<InheritedTestObject>()
-				                    .createNew(InheritedTestObject.class)
+				                             .createNew(InheritedTestObject.class)
 				                             .with(x -> x.inheritedFlag = true)
-				                    .fabricate();
+				                             .fabricate();
 
 		assertEquals("name", result.name);
 		assertEquals(0, result.age);
@@ -94,7 +94,6 @@ public class FabricatorTests
 	@Test
 	public void testFluentCollectionInterface()
 	{
-
 		TestObject result = new Fabricator<TestObject>()
 				                    .createNewCollection(TestObject.class).ofSize(100)
 				                    .all()
@@ -112,7 +111,7 @@ public class FabricatorTests
 				                    .and(x -> x.age = 5)
 				                    .thePrevious(2)
 				                    .with(x -> x.age = 4)
-				                    .everyNth(3)
+				                    .predicated(index -> index%3 == 0)
 				                    .with(x -> x.title = "Dr")
 				                    .and(x -> x.age = 50)
 				                    .theSlice(0, 3)
@@ -120,33 +119,6 @@ public class FabricatorTests
 				                    .random(3)
 				                    .with(x -> x.hungry = true)
 				                    .fabricate();
-
-//		FabricatorConfiguration testConfig = new FabricatorConfiguration();
-//
-//      // This is the interface I would like!
-//		TestObject result = new Fabricator<TestObject>()
-//				                    .createNewCollection(TestObject.class).ofSize(10)
-//									.all()
-//										.with(x -> x.name ="bob")
-//										.and(x->x.age = 1);
-//									.theFirst(2)
-//										.with(x->x.title = "Mr")
-//										.and(x->x.age = 20)
-//									.theNext(2)
-//					                    .with(x->x.title = "Mrs")
-//					                    .and(x->x.age = 23)
-//									.theLast(1)
-//					                    .with(x->x.title = "Miss")
-//					                    .and(x->x.age = 5)
-//									.thePrevious(2)
-//										.with(x->x.age=4)
-//									.theNth(5)
-//					                    .with(x->x.title = "Dr")
-//				                        .and(x->x.age = 50)
-//									.theSlice(0,3)
-//				                        .with(x->x.name = "ted")
-//									.random(3)
-//										.with(x->x.hungry = true);
 	}
 
 	public class TestObject
