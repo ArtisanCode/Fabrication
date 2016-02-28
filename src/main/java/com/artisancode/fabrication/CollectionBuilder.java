@@ -33,16 +33,16 @@ public class CollectionBuilder<T>
 		this.configuration = configuration;
 		state = Behaviour.ALL;
 
-		initFoundations(5); // Default list size is 5
+		initModificationsAndState(5); // Default list size is 5
 	}
 
 	public CollectionBuilder<T> ofSize(int size)
 	{
-		initFoundations(size);
+		initModificationsAndState(size);
 		return this;
 	}
 
-	protected void initFoundations(int size)
+	protected void initModificationsAndState(int size)
 	{
 		this.size = size;
 		modificationsArray = new ArrayList<>(size);
@@ -50,6 +50,10 @@ public class CollectionBuilder<T>
 		{
 			modificationsArray.add(i, new LinkedList<>());
 		}
+
+		// Set the initial state of the CollectionBuilder so that you can't use previous/next without other modifications
+		lastModificationStartIndex = 0;
+		lastModificationEndIndex = size - 1;
 	}
 
 	public CollectionBuilder<T> all()
@@ -190,9 +194,9 @@ public class CollectionBuilder<T>
 
 	private void handleRandomModifications(Action1<T> modifier)
 	{
-		if (operationModifier < 0)
+		if (operationModifier <= 0)
 		{
-			throw new FabricationException(String.format("Unable to modify %d number of random elements as the number of nodes to affect needs to be a positive integer or zero", operationModifier));
+			throw new FabricationException(String.format("Unable to modify %d number of random elements as the number of nodes to affect needs to be a positive integer", operationModifier));
 		}
 
 		if (operationModifier > size)

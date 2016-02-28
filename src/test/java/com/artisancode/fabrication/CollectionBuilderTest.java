@@ -59,7 +59,6 @@ public class CollectionBuilderTest
 	@Test
 	public void handleRandomModifications_TwoModifier_ModificationsAddedToTwo()
 	{
-		testRandomMethods(0);
 		testRandomMethods(1);
 		testRandomMethods(2);
 		testRandomMethods(3);
@@ -88,6 +87,22 @@ public class CollectionBuilderTest
 		// Check that the index state hasn't been changed
 		assertEquals(startIndex, target.lastModificationStartIndex);
 		assertEquals(endIndex, target.lastModificationEndIndex);
+	}
+
+	@Test(expected = FabricationException.class)
+	public void handleRandomModifications_ZeroNumberOfModifications_FabricationExceptionThrown()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+
+		target.random(0).with(x -> x.name = "bob");
+	}
+
+	@Test(expected = FabricationException.class)
+	public void handleRandomModifications_100Modifications_FabricationExceptionThrown()
+	{
+		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
+
+		target.random(100).with(x -> x.name = "bob");
 	}
 
 	@Test
