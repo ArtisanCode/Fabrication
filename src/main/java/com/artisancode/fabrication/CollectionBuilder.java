@@ -21,6 +21,7 @@ public class CollectionBuilder<T>
 	protected Predicate<Integer> operationPredicate;
 	protected Random random;
 	protected Supplier<Integer> getRandomIndex = () -> random.nextInt(size);
+	protected Map<Behaviour, Consumer<Consumer<T>>> stateModificationsMap = new HashMap<>();
 
 	public CollectionBuilder(Class<? extends T> target)
 	{
@@ -32,6 +33,17 @@ public class CollectionBuilder<T>
 		this.target = target;
 		this.configuration = configuration;
 		state = Behaviour.ALL;
+
+		stateModificationsMap = new HashMap<>();
+		stateModificationsMap.put(Behaviour.ALL, (mod) -> handleGlobalModifications(mod));
+		stateModificationsMap.put(Behaviour.FIRST, (mod) -> handleFirstModifications(mod));
+//		stateModificationsMap.put(Behaviour.NEXT, (mod) -> handleNextModifications(mod));
+		stateModificationsMap.put(Behaviour.LAST, (mod) -> handleLastModifications(mod));
+//		stateModificationsMap.put(Behaviour.PREVIOUS, (mod) -> handlePreviousModifications(mod));
+		stateModificationsMap.put(Behaviour.NTH, (mod) -> handleModifyTheNthElement(mod));
+		stateModificationsMap.put(Behaviour.SLICE, (mod) -> handleSliceModifications(mod));
+		stateModificationsMap.put(Behaviour.PREDICATE, (mod) -> handlePredicatedModifications(mod));
+		stateModificationsMap.put(Behaviour.RANDOM, (mod) -> handleRandomModifications(mod));
 
 		initModificationsAndState(5); // Default list size is 5
 	}
@@ -107,10 +119,6 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
-	/**
-	 * @param predicate A function that takes in the index and the o
-	 * @return
-	 */
 	public CollectionBuilder<T> predicated(Predicate<Integer> predicate)
 	{
 		state = Behaviour.PREDICATE;
@@ -141,54 +149,10 @@ public class CollectionBuilder<T>
 
 	protected CollectionBuilder<T> add(Consumer<T> modifier)
 	{
-		switch (state)
+		if(stateModificationsMap.containsKey(state))
 		{
-			case ALL:
-			default:
-			{
-				handleGlobalModifications(modifier);
-				break;
-			}
-			case FIRST:
-			{
-				handleFirstModifications(modifier);
-				break;
-			}
-			case NEXT:
-			{
-				break;
-			}
-			case LAST:
-			{
-				handleLastModifications(modifier);
-				break;
-			}
-			case PREVIOUS:
-			{
-				break;
-			}
-			case NTH:
-			{
-				handleModifyTheNthElement(modifier);
-				break;
-			}
-			case PREDICATE:
-			{
-				handlePredicatedModifications(modifier);
-				break;
-			}
-			case SLICE:
-			{
-				handleSliceModifications(modifier);
-				break;
-			}
-			case RANDOM:
-			{
-				handleRandomModifications(modifier);
-				break;
-			}
+			stateModificationsMap.get(state).accept(modifier);
 		}
-
 		return this;
 	}
 
