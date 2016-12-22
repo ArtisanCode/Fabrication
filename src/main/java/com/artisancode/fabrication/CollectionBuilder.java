@@ -1,11 +1,11 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Action1;
-import com.artisancode.fabrication.lambdas.Func1;
-
-import java.time.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class CollectionBuilder<T>
 {
@@ -17,10 +17,10 @@ public class CollectionBuilder<T>
 	protected int secondaryModifier;
 	protected int lastModificationStartIndex = 0;
 	protected int lastModificationEndIndex = 0;
-	protected List<List<Action1<T>>> modificationsArray;
+	protected List<List<Consumer<T>>> modificationsArray;
 	protected Predicate<Integer> operationPredicate;
 	protected Random random;
-	protected Func1<Integer> getRandomIndex = () -> random.nextInt(size);
+	protected Supplier<Integer> getRandomIndex = () -> random.nextInt(size);
 
 	public CollectionBuilder(Class<? extends T> target)
 	{
@@ -62,12 +62,12 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
-	public CollectionBuilder<T> and(Action1<T> modifier)
+	public CollectionBuilder<T> and(Consumer<T> modifier)
 	{
 		return add(modifier);
 	}
 
-	public CollectionBuilder<T> with(Action1<T> modifier)
+	public CollectionBuilder<T> with(Consumer<T> modifier)
 	{
 		return add(modifier);
 	}
@@ -130,7 +130,7 @@ public class CollectionBuilder<T>
 	{
 		state = Behaviour.RANDOM;
 		operationModifier = number;
-		random = new Random((int)LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toEpochSecond());
+		random = new Random((int) LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toEpochSecond());
 		return this;
 	}
 
@@ -139,7 +139,7 @@ public class CollectionBuilder<T>
 		return null;
 	}
 
-	protected CollectionBuilder<T> add(Action1<T> modifier)
+	protected CollectionBuilder<T> add(Consumer<T> modifier)
 	{
 		switch (state)
 		{
@@ -192,7 +192,7 @@ public class CollectionBuilder<T>
 		return this;
 	}
 
-	private void handleRandomModifications(Action1<T> modifier)
+	private void handleRandomModifications(Consumer<T> modifier)
 	{
 		if (operationModifier <= 0)
 		{
@@ -206,9 +206,9 @@ public class CollectionBuilder<T>
 
 		Set<Integer> indiciesToModify = new HashSet<>(size);
 
-		while(indiciesToModify.size() != operationModifier)
+		while (indiciesToModify.size() != operationModifier)
 		{
-			indiciesToModify.add(getRandomIndex.func());
+			indiciesToModify.add(getRandomIndex.get());
 		}
 
 		for (Integer index : indiciesToModify)
@@ -217,15 +217,15 @@ public class CollectionBuilder<T>
 		}
 	}
 
-	protected void handlePredicatedModifications(Action1<T> modifier)
+	protected void handlePredicatedModifications(Consumer<T> modifier)
 	{
 		boolean modified = false;
 		for (int i = 0; i < modificationsArray.size(); i++)
 		{
 			// If the index matches the predicate, then add the modifier
-			if(operationPredicate.test(i))
+			if (operationPredicate.test(i))
 			{
-				if(!modified)
+				if (!modified)
 				{
 					// Only set the start index state the first time we set a modifier
 					modified = true;
@@ -238,7 +238,7 @@ public class CollectionBuilder<T>
 		}
 	}
 
-	protected void handleModifyTheNthElement(Action1<T> modifier)
+	protected void handleModifyTheNthElement(Consumer<T> modifier)
 	{
 		if (operationModifier < 0)
 		{
@@ -253,7 +253,7 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, operationModifier, operationModifier);
 	}
 
-	protected void handleSliceModifications(Action1<T> modifier)
+	protected void handleSliceModifications(Consumer<T> modifier)
 	{
 		if (operationModifier < 0)
 		{
@@ -283,7 +283,7 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, operationModifier, secondaryModifier);
 	}
 
-	protected void handleLastModifications(Action1<T> modifier)
+	protected void handleLastModifications(Consumer<T> modifier)
 	{
 		if (operationModifier < 1)
 		{
@@ -298,15 +298,15 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, size - operationModifier, size - 1);
 	}
 
-	public void handleGlobalModifications(Action1<T> modifier)
+	public void handleGlobalModifications(Consumer<T> modifier)
 	{
-		for (List<Action1<T>> modifiers : modificationsArray)
+		for (List<Consumer<T>> modifiers : modificationsArray)
 		{
 			modifiers.add(modifier);
 		}
 	}
 
-	public void handleFirstModifications(Action1<T> modifier)
+	public void handleFirstModifications(Consumer<T> modifier)
 	{
 		if (operationModifier < 1)
 		{
@@ -322,7 +322,7 @@ public class CollectionBuilder<T>
 		modifySlice(modifier, 0, operationModifier - 1);
 	}
 
-	protected void modifySlice(Action1<T> modifier, int start, int end)
+	protected void modifySlice(Consumer<T> modifier, int start, int end)
 	{
 		lastModificationStartIndex = start;
 		lastModificationEndIndex = end;

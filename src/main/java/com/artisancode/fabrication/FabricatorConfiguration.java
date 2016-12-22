@@ -1,8 +1,7 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Func1;
-
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -10,20 +9,21 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class FabricatorConfiguration
 {
-	public HashMap<Class<?>, Func1<Object>> customGenerators = new HashMap<>();
+	public HashMap<Class<?>, Supplier<Object>> customGenerators = new HashMap<>();
 	public boolean useFieldNameForString;
 	public boolean recursive;
 	public int recurseLimit;
 	public int generationSeed;
 	// Temporal helpers
-	public Func1<Date> currentDate = () -> Date.from(Instant.now());
-	public Func1<Instant> currentInstant = () -> Instant.now();
-	public Func1<ZonedDateTime> currentZonedDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC);
-	public Func1<LocalDateTime> currentLocalDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
-	protected HashMap<Class<?>, Func1<Object>> defaultGenerators = new HashMap<>();
+	public Supplier<Date> currentDate = () -> Date.from(Instant.now());
+	public Supplier<Instant> currentInstant = () -> Instant.now();
+	public Supplier<ZonedDateTime> currentZonedDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC);
+	public Supplier<LocalDateTime> currentLocalDateTime = () -> ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
+	protected HashMap<Class<?>, Supplier<Object>> defaultGenerators = new HashMap<>();
 
 	public FabricatorConfiguration()
 	{
@@ -40,9 +40,29 @@ public class FabricatorConfiguration
 		initDefaultGenerators();
 	}
 
-	public void initDefaultGenerators()
+	FabricatorConfiguration(int generationSeed,
+	                        boolean useFieldNameForString,
+	                        boolean recursive,
+	                        int recurseLimit,
+	                        Supplier<Date> currentDate,
+	                        Supplier<Instant> currentInstant,
+	                        Supplier<ZonedDateTime> currentZonedDateTime,
+	                        Supplier<LocalDateTime> currentLocalDateTime)
+	{
+		this(generationSeed);
+		this.useFieldNameForString = useFieldNameForString;
+		this.recursive = recursive;
+		this.recurseLimit = recurseLimit;
+		this.currentDate = currentDate;
+		this.currentInstant = currentInstant;
+		this.currentZonedDateTime = currentZonedDateTime;
+		this.currentLocalDateTime = currentLocalDateTime;
+	}
+
+	void initDefaultGenerators()
 	{
 		defaultGenerators.put(int.class, () -> generationSeed);
+		defaultGenerators.put(BigDecimal.class, () -> generationSeed);
 		defaultGenerators.put(double.class, () -> (double) generationSeed);
 		defaultGenerators.put(byte.class, () -> (byte) generationSeed);
 		defaultGenerators.put(short.class, () -> (short) generationSeed);
@@ -53,16 +73,16 @@ public class FabricatorConfiguration
 		defaultGenerators.put(String.class, () -> Integer.toString(generationSeed));
 
 		// Temporal generators
-		defaultGenerators.put(Date.class, () -> currentDate.func());
-		defaultGenerators.put(Instant.class, () -> currentInstant.func());
-		defaultGenerators.put(ZonedDateTime.class, () -> currentZonedDateTime.func());
-		defaultGenerators.put(LocalDateTime.class, () -> currentLocalDateTime.func());
+		defaultGenerators.put(Date.class, () -> currentDate.get());
+		defaultGenerators.put(Instant.class, () -> currentInstant.get());
+		defaultGenerators.put(ZonedDateTime.class, () -> currentZonedDateTime.get());
+		defaultGenerators.put(LocalDateTime.class, () -> currentLocalDateTime.get());
 	}
 
 	public Object generate(Class<?> targetClass, String fieldName)
 	{
-		Func1<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
-				                          .orElse(defaultGenerators.get(targetClass));
+		Supplier<Object> generator = Optional.ofNullable(customGenerators.get(targetClass))
+				                             .orElse(defaultGenerators.get(targetClass));
 
 		if (targetClass == String.class && useFieldNameForString && fieldName != null)
 		{
@@ -73,7 +93,7 @@ public class FabricatorConfiguration
 		if (generator != null)
 		{
 			// A generator exists ... use it!
-			return generator.func();
+			return generator.get();
 		}
 
 		if (targetClass.isEnum())
@@ -97,20 +117,19 @@ public class FabricatorConfiguration
 		return null;
 	}
 
-	public FabricatorConfiguration cloneForNextGeneration()
+	FabricatorConfiguration cloneForNextGeneration()
 	{
-		FabricatorConfiguration result = new FabricatorConfiguration(generationSeed + 1);
-
-		result.useFieldNameForString = useFieldNameForString;
-		result.recursive = recursive;
-		result.recurseLimit = recurseLimit - 1;
-		result.currentDate = currentDate;
-		result.currentInstant = currentInstant;
-		result.currentZonedDateTime = currentZonedDateTime;
-		result.currentLocalDateTime = currentLocalDateTime;
+		FabricatorConfiguration result = new FabricatorConfiguration(generationSeed + 1,
+				                                                            useFieldNameForString,
+				                                                            recursive,
+				                                                            recurseLimit - 1,
+				                                                            currentDate,
+				                                                            currentInstant,
+				                                                            currentZonedDateTime,
+				                                                            currentLocalDateTime);
 
 		// Copy across any custom generators that exist
-		customGenerators.entrySet().stream().forEach(x -> result.customGenerators.put(x.getKey(), x.getValue()));
+		result.customGenerators.putAll(customGenerators);
 
 		return result;
 	}

@@ -1,6 +1,5 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Action2;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -8,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.function.BiConsumer;
 
 import static org.junit.Assert.*;
 
@@ -162,16 +162,16 @@ public class FabricatorConfigurationTests
 
 		TestClassRecursiveLimit actualResult = (TestClassRecursiveLimit) target.generate(TestClassRecursiveLimit.class, null);
 
-		Action2<TestClassRecursiveLimit, Integer> checkInnerClass = (inner, generation) -> {
+		BiConsumer<TestClassRecursiveLimit, Integer> checkInnerClass = (inner, generation) -> {
 			assertNotNull(inner);
 			assertEquals(inner.generation, generation.intValue());
 		};
 
-		checkInnerClass.action(actualResult, 1);
-		checkInnerClass.action(actualResult.innerObject, 2);
-		checkInnerClass.action(actualResult.innerObject.innerObject, 3);
-		checkInnerClass.action(actualResult.innerObject.innerObject.innerObject, 4);
-		checkInnerClass.action(actualResult.innerObject.innerObject.innerObject.innerObject, 5);
+		checkInnerClass.accept(actualResult, 1);
+		checkInnerClass.accept(actualResult.innerObject, 2);
+		checkInnerClass.accept(actualResult.innerObject.innerObject, 3);
+		checkInnerClass.accept(actualResult.innerObject.innerObject.innerObject, 4);
+		checkInnerClass.accept(actualResult.innerObject.innerObject.innerObject.innerObject, 5);
 
 		assertNull(actualResult.innerObject.innerObject.innerObject.innerObject.innerObject);
 	}

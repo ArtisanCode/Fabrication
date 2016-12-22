@@ -1,29 +1,24 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Action1;
 import org.objenesis.ObjenesisStd;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ObjectBuilder<T>
 {
 	protected Class<? extends T> target;
 	protected FabricatorConfiguration configuration;
-	protected List<Action1<T>> modifiers;
+	protected List<Consumer<T>> modifiers;
 
 	public ObjectBuilder(Class<? extends T> target, FabricatorConfiguration configuration)
 	{
 		this.target = target;
 		this.configuration = configuration;
 		modifiers = new ArrayList<>();
-	}
-
-	public ObjectBuilder<T> and(Action1<T> property)
-	{
-		return add(property);
 	}
 
 	public T fabricate()
@@ -57,20 +52,26 @@ public class ObjectBuilder<T>
 		}
 
 		// Perform the specific object test modifications
-		for (Action1<T> modifier : modifiers)
+		for (Consumer<T> modifier : modifiers)
 		{
-			modifier.action(result);
+			modifier.accept(result);
 		}
 
 		return result;
 	}
 
-	public ObjectBuilder<T> with(Action1<T> property)
+	public ObjectBuilder<T> with(Consumer<T> property)
 	{
 		return add(property);
 	}
 
-	protected ObjectBuilder<T> add(Action1<T> property)
+
+	public ObjectBuilder<T> and(Consumer<T> property)
+	{
+		return add(property);
+	}
+
+	protected ObjectBuilder<T> add(Consumer<T> property)
 	{
 		modifiers.add(property);
 		return this;

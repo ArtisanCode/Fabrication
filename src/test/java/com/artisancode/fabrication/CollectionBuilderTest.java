@@ -1,7 +1,8 @@
 package com.artisancode.fabrication;
 
-import com.artisancode.fabrication.lambdas.Action1;
 import org.junit.Test;
+
+import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
@@ -12,7 +13,7 @@ public class CollectionBuilderTest
 	public void ofSize_ReinitializeState_SetStateAccordinglyAndCreateNewModificationsList()
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
-		java.util.List<java.util.List<Action1<FabricatorTests.TestObject>>> modifiersBefore = target.modificationsArray;
+		java.util.List<java.util.List<Consumer<FabricatorTests.TestObject>>> modifiersBefore = target.modificationsArray;
 
 		int targetSize = 10;
 
@@ -34,7 +35,7 @@ public class CollectionBuilderTest
 		target.lastModificationStartIndex = startIndex;
 		target.lastModificationEndIndex = endIndex;
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
 		target.all().with(modifier);
 
 		// Check that the first 2 elements have modifications
@@ -75,7 +76,7 @@ public class CollectionBuilderTest
 		target.lastModificationStartIndex = startIndex;
 		target.lastModificationEndIndex = endIndex;
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
 		target.random(numberOfModifications).and(modifier);
 
 		// Check that the first 2 elements have modifications
@@ -115,8 +116,8 @@ public class CollectionBuilderTest
 		target.lastModificationStartIndex = 0;
 		target.lastModificationEndIndex = 0;
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
-		target.predicated(i -> i%2==0 && i!=0).with(modifier);
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		target.predicated(i -> i % 2 == 0 && i != 0).with(modifier);
 
 		// Check that the first 2 elements have modifications
 		assertEquals(5, target.modificationsArray.size());
@@ -139,7 +140,7 @@ public class CollectionBuilderTest
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
 		target.theFirst(2).with(modifier);
 
 		// Check that the first 2 elements have modifications
@@ -179,7 +180,7 @@ public class CollectionBuilderTest
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
 		target.theLast(2).with(modifier);
 
 		// Check that the first 2 elements have modifications
@@ -219,7 +220,7 @@ public class CollectionBuilderTest
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
 		target.theSlice(1, 3).with(modifier);
 
 		// Check that the first 2 elements have modifications
@@ -285,7 +286,7 @@ public class CollectionBuilderTest
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 
-		Action1<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
+		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
 		target.theNth(3).with(modifier);
 
 		// Check that the first 2 elements have modifications
