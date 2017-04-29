@@ -2,8 +2,9 @@ package com.artisancode.fabrication;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class FabricatorTests
 {
@@ -94,9 +95,10 @@ public class FabricatorTests
 	@Test
 	public void testFluentCollectionInterface()
 	{
-		TestObject result = new Fabricator<TestObject>()
-				                    .createNewCollection(TestObject.class).ofSize(100)
-				                    .all()
+        int size = 100;
+        List<TestObject> result = new Fabricator<TestObject>()
+                .createNewCollection(TestObject.class).ofSize(size)
+                .all()
 				                    .with(x -> x.name = "bob")
 				                    .theFirst(2)
 				                    .with(x -> x.title = "Mr")
@@ -111,15 +113,18 @@ public class FabricatorTests
 				                    .and(x -> x.age = 5)
 				                    .thePrevious(2)
 				                    .with(x -> x.age = 4)
-				                    .predicated(index -> index%3 == 0)
-				                    .with(x -> x.title = "Dr")
-				                    .and(x -> x.age = 50)
+                .predicated(index -> index == 2)
+                .with(x -> x.name = "Second")
+                .and(x -> x.age = 50)
 				                    .theSlice(0, 3)
 				                    .with(x -> x.name = "ted")
 				                    .random(3)
 				                    .with(x -> x.hungry = true)
 				                    .fabricate();
-	}
+
+        assertNotNull(result);
+        assertEquals(size, result.size());
+    }
 
 	public class TestObject
 	{

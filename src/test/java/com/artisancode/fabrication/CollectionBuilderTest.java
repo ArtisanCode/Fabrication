@@ -2,6 +2,7 @@ package com.artisancode.fabrication;
 
 import org.junit.Test;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
@@ -60,14 +61,19 @@ public class CollectionBuilderTest
 	@Test
 	public void handleRandomModifications_TwoModifier_ModificationsAddedToTwo()
 	{
-		testRandomMethods(1);
-		testRandomMethods(2);
-		testRandomMethods(3);
-		testRandomMethods(4);
-		testRandomMethods(5);
+		testRandomMethods(1, Optional.empty());
+		testRandomMethods(2, Optional.empty());
+		testRandomMethods(3, Optional.empty());
+		testRandomMethods(4, Optional.empty());
+		testRandomMethods(5, Optional.empty());
+		testRandomMethods(1, Optional.of(1234));
+		testRandomMethods(2, Optional.of(1234));
+		testRandomMethods(3, Optional.of(1234));
+		testRandomMethods(4, Optional.of(1234));
+		testRandomMethods(5, Optional.of(1234));
 	}
 
-	protected void testRandomMethods(int numberOfModifications)
+	private void testRandomMethods(int numberOfModifications, Optional<Integer> seed)
 	{
 		CollectionBuilder<FabricatorTests.TestObject> target = new CollectionBuilder<>(FabricatorTests.TestObject.class);
 		int startIndex = 3;
@@ -77,7 +83,12 @@ public class CollectionBuilderTest
 		target.lastModificationEndIndex = endIndex;
 
 		Consumer<FabricatorTests.TestObject> modifier = x -> x.name = "bob";
-		target.random(numberOfModifications).and(modifier);
+
+		if (seed.isPresent()) {
+			target.random(numberOfModifications, seed.get()).and(modifier);
+		} else {
+			target.random(numberOfModifications).and(modifier);
+		}
 
 		// Check that the first 2 elements have modifications
 		assertEquals(5, target.modificationsArray.size());
